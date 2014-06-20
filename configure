@@ -9,13 +9,14 @@ TARGET=`rustc --version 2> /dev/null | awk '/host:/ { FS = " "; print $2 }'`
 # $2: name (usually the git repo name)
 #     The name under which the dependency will be stored
 # $3: build location
-#     The location to which the git builds (omit trailing '/')
-# $4: build command
-#     The argument to pass to make (not required)
-# $5: dependency
-#     Pass dependency name to prevent recompiling nested dependency
-#     This will only work if there is but one dependency
-#     If a loaded dependency is found, ./configure will not be executed
+#     The location to which the dependency builds (omit trailing '/')
+# $4: build command (optional - `make`)
+#     The argument to pass to make
+# $5: dependencies already installed (optional - false)
+#     Pass true if all of the dependencies of this dependency are already
+#     compiled by previous updateDependency calls. This will compile this
+#     dependency with the previously compiled dependencies INSTEAD of running
+#     this dependency's ./configure script.
 updateDependency () {
 # Clear this dependency's folder if it exists already.
 if [ -d deps/$2 ]; then
@@ -26,7 +27,7 @@ fi
 # Build dependency
 # (assumes existence of make)
   cd deps/$2
-  if [ $5 ] && [ -d ../$5 ]; then
+  if [ $5 ]; then
 # Copy already loaded dependency
     mkdir -p target/$TARGET/lib
 # (symlinking does not work on OS X)
